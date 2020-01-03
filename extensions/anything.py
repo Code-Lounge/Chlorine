@@ -15,9 +15,15 @@ class Anything(Cog):
         #raise NotImplementedError()
         async with ClientSession() as session:
             adapter = AsyncWebhookAdapter(session)
-        
-            webhook = Webhook.from_url(self.wh_url, adapter=adapter)
-            await webhook.send(message, username=f"Sugestão ~ {ctx.author.name}", avatar_url=ctx.author.avatar_url)
+
+            try:
+                webhook = Webhook.from_url(self.wh_url, adapter=adapter)
+                await webhook.send(message, username=f"Sugestão ~ {ctx.author.name}", avatar_url=ctx.author.avatar_url)
+            except:
+                #raised by Webhook.from_url ~ InvalidArgument – The URL is invalid.
+                await ctx.send(f"Não foi possível enviar a sua sugestão...")
+            else:
+                await ctx.send(f"Obrigado pela sua sugestão! Ela foi encaminhada para os moderadores!")
 
 
 def setup(bot: Bot) -> None:
