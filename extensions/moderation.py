@@ -2,6 +2,7 @@ from discord.ext.commands import Cog, Bot, command, Context, has_permissions
 from discord import Member, Guild
 from discord.errors import HTTPException
 from asyncio import sleep
+from os.path import basename
 
 
 class Moderation(Cog):
