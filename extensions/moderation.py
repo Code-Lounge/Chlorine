@@ -61,7 +61,7 @@ class Moderation(Cog):
 def setup(bot: Bot) -> None:
     # ~On load
     try:
-        bot.add_cog(Events(bot))
+        bot.add_cog(Moderation(bot))
     except Exception as error:
         print("{0.__class__.__name__}: {0}".format(error))
     else:
