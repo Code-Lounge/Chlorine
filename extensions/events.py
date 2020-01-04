@@ -24,6 +24,15 @@ class Events(Cog):
             reply = f"B{'o' * randint(1, 3)}m di{'a' * randint(1, 5)}!"
             await message.channel.send(reply)
 
+        suggestion_channel = message.guild.get_channel(self.suggestion_channel_id)
+        if suggestion_channel:
+            if message.channel.id == suggestion_channel.id:
+                await message.add_reaction('⬆️')
+                await message.add_reaction('⬇️')
+        else:
+            print(f"Suggestion channel not found.")
+
+            
         #await self.bot.process_commands(message)
 
     @Cog.listener()
