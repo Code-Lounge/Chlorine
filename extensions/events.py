@@ -29,7 +29,7 @@ class Events(Cog):
     @Cog.listener()
     async def on_command_error(self, ctx: Context, error: CommandError) -> None:
         if isinstance(error, CommandNotFound):
-            await ctx.add_reaction('❌')
+            await ctx.message.add_reaction('❌')
         elif isinstance(error, MissingPermissions):
             missing_permissions = ', '.join(error.missing_perms)
             await ctx.send(f"Você não possuí permissões o suficientes para executar este comando.\nPermissões faltantes: `{missing_permissions}`")
