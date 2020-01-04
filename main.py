@@ -25,7 +25,7 @@ if __name__ == "__main__":
             file_name, ext = splitext(file)
             path = join("extensions", file_name)
             try:
-                bot.load_extension(path.replace("\\", '.'))
+                bot.load_extension(path.replace("\\", '.').replace('\', '.'))
             except Exception as error:
                 print("{0.__class__.__name__}: {0}".format(error))
 
