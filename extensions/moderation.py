@@ -15,17 +15,19 @@ class Moderation(Cog):
         try:
             await ctx.guild.ban(target, reason=reason, delete_message_days=0)
         except HTTPException as error:
-            await ctx.send(f"Não foi possível banir {target.mention}.")
+            await ctx.send(f"Não foi possível banir {target.mention}. {error.text}")
         else:
             await ctx.send(f"{target.mention} foi banido do servidor.")
 
     @command()
     @has_permissions(kick_members=True)
     async def kick(self, ctx: Context, target: Member, reason: str="...") -> None:
+        raise NotImplementedError()
+
         try:
             await ctx.guild.kick(target, reason=reason, delete_message_days=0)
         except HTTPException as error:
-            await ctx.send(f"Não foi possível expulsar {target.mention}.")
+            await ctx.send(f"Não foi possível expulsar {target.mention}. {error.text}")
         else:
             await ctx.send(f"{target.mention} foi expulso do servidor.")
 
@@ -48,8 +50,8 @@ class Moderation(Cog):
     async def trustworthy(self, ctx: Context, target: Member):
         try:
             await target.add_roles(self.trustworthy_role)
-        except HTTPException:
-            await ctx.send(f"Não foi possível adicionar o cargo para {target.mention}.")
+        except HTTPException as error:
+            await ctx.send(f"Não foi possível adicionar o cargo para {target.mention}. {error.text}")
         else:
             await ctx.send(f"{target.mention} agora possuí o cargo `{self.trustworthy_role.name}`!")
 
