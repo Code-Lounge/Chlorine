@@ -12,21 +12,16 @@ class Moderation(Cog):
     @command()
     @has_permissions(ban_members=True)
     async def ban(self, ctx: Context, target: Member, reason: str="...") -> None:
-        raise NotImplementedError()
-
         try:
             await ctx.guild.ban(target, reason=reason, delete_message_days=0)
         except HTTPException as error:
             await ctx.send(f"Não foi possível banir {target.mention}.")
-            raise error
         else:
             await ctx.send(f"{target.mention} foi banido do servidor.")
 
     @command()
     @has_permissions(kick_members=True)
     async def kick(self, ctx: Context, target: Member, reason: str="...") -> None:
-        raise NotImplementedError()
-
         try:
             await ctx.guild.kick(target, reason=reason, delete_message_days=0)
         except HTTPException as error:
