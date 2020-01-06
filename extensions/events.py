@@ -10,9 +10,6 @@ class Events(Cog):
     def __init__(self, bot: Bot) -> None:
         self.bot = bot
 
-        self.log_channel_id = bot.database["Channels"]["log"]
-        self.main_channel_id = bot.database["Channels"]["main"]
-
     @Cog.listener()
     async def on_ready(self) -> None:
         await self.bot.change_presence(activity=Game(name="você pela janela, não se segure!"))
@@ -24,7 +21,7 @@ class Events(Cog):
             reply = f"B{'o' * randint(1, 3)}m di{'a' * randint(1, 5)}!"
             await message.channel.send(reply)
 
-        suggestion_channel = message.guild.get_channel(self.suggestion_channel_id)
+        suggestion_channel = message.guild.get_channel(self.bot.suggestion_channel_id)
         if suggestion_channel:
             if message.channel.id == suggestion_channel.id:
                 await message.add_reaction('⬆️')
@@ -39,13 +36,17 @@ class Events(Cog):
     async def on_command_error(self, ctx: Context, error: CommandError) -> None:
         if isinstance(error, CommandNotFound):
             await ctx.message.add_reaction('❌')
+
         elif isinstance(error, MissingPermissions):
             missing_permissions = ', '.join(error.missing_perms)
             await ctx.send(f"Você não possuí permissões o suficientes para executar este comando.\nPermissões faltantes: `{missing_permissions}`")
+
         elif isinstance(error, MissingRequiredArgument):
             await ctx.send(f"Você não me informou o `{error.param.name}` do comando `{ctx.invoked_with}`.")
+
         elif isinstance(error, BadArgument):
             await ctx.send(f"Você me passou uma informação errada para o comando `{ctx.invoked_with}`!")
+
         elif isinstance(error, CommandInvokeError):
             if isinstance(error.original, NotImplementedError):
                 await ctx.send(f"O comando `{ctx.invoked_with}` ainda não foi implementado.")
@@ -62,13 +63,13 @@ class Events(Cog):
     async def on_member_join(self, member: Member):
         message = f"{member.mention} entrou no servidor."
 
-        log_channel = member.guild.get_channel(self.log_channel_id)
+        log_channel = member.guild.get_channel(self.bot.log_channel_id)
         if log_channel:
             await log_channel.send(message)
         else:
             print(f"Log channel not found.")
         
-        main_channel = member.guild.get_channel(self.main_channel_id)
+        main_channel = member.guild.get_channel(self.bot.main_channel_id)
         if self.main_channel:
             await main_channel.send(message)
         else:
@@ -76,7 +77,7 @@ class Events(Cog):
 
     @Cog.listener()
     async def on_member_remove(self, member: Member):
-        log_channel = member.guild.get_channel(self.log_channel_id)
+        log_channel = member.guild.get_channel(self.bot.log_channel_id)
         if log_channel:
             await log_channel.send(f"{member.mention} deixou o servidor.")
         else:
