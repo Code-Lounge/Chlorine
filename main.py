@@ -17,7 +17,7 @@ class NPC(Bot):
         super().__init__(*args, **kwargs)
 
 
-bot = NPC(command_prefix='ch ', case_insensitive=True)
+bot = NPC(command_prefix='.', case_insensitive=True)
 
 if __name__ == "__main__":
     for item in walk("extensions"):

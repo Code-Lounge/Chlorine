@@ -17,6 +17,7 @@ class Events(Cog):
 
     @Cog.listener()
     async def on_message(self, message: Message) -> None:
+        
         if "bom dia" in message.content.lower():
             reply = f"B{'o' * randint(1, 3)}m di{'a' * randint(1, 5)}!"
             await message.channel.send(reply)

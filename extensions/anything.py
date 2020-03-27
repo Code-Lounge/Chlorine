@@ -18,7 +18,8 @@ class Anything(Cog):
 
             try:
                 webhook = Webhook.from_url(self.wh_url, adapter=adapter)
-                await webhook.send(message, username=f"Sugestão ~ {ctx.author.name}", avatar_url=ctx.author.avatar_url)
+                webhookSend = await webhook.send(message, username=f"Sugestão ~ {ctx.author.name}", avatar_url=ctx.author.avatar_url)
+                print(webhookSend)
             except:
                 #raised by Webhook.from_url ~ InvalidArgument – The URL is invalid.
                 await ctx.send(f"Não foi possível enviar a sua sugestão...")
