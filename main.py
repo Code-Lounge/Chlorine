@@ -1,8 +1,11 @@
 from discord.ext.commands import Bot
-from os import walk, name
+from os import walk, name, getenv
 from os.path import join, splitext, abspath, split
 from json import load
+from dotenv import load_dotenv
 
+load_dotenv()
+TOKEN = getenv('DISCORD_TOKEN')
 
 class NPC(Bot):
     def __init__(self, *args, **kwargs) -> None:
@@ -30,4 +33,4 @@ if __name__ == "__main__":
             except Exception as error:
                 print("{0.__class__.__name__}: {0}".format(error))
 
-    bot.run("")
+    bot.run(TOKEN)
