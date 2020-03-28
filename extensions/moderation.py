@@ -24,7 +24,7 @@ class Moderation(Cog):
     @command()
     @has_permissions(kick_members=True)
     async def kick(self, ctx: Context, target: Member, reason: str = "...") -> None:
-        raise NotImplementedError()
+        #raise NotImplementedError()
         try:
             await ctx.guild.kick(target, reason=reason, delete_message_days=0)
         except HTTPException as error:
@@ -35,7 +35,7 @@ class Moderation(Cog):
     @command()
     @has_permissions(manage_roles=True)
     async def mute(self, ctx: Context, target: Member, reason: str = "...", timeout: int = 1):
-        raise NotImplementedError()
+        #raise NotImplementedError()
         try:
             await target.add_roles(self.mute_role)
         except HTTPException:
@@ -54,20 +54,6 @@ class Moderation(Cog):
             await ctx.send(f"Não foi possível adicionar o cargo para {target.mention}. {error.text}")
         else:
             await ctx.send(f"{target.mention} agora possuí o cargo `{self.trustworthy_role.name}`!")
-
-    @command()
-    async def corona(self, ctx: Context):
-    
-        url = "https://coronavirus-monitor.p.rapidapi.com/coronavirus/cases_by_country.php"
-
-        headers = {
-            'x-rapidapi-host': "coronavirus-monitor.p.rapidapi.com",
-            'x-rapidapi-key': "d463a45e27msh5727a45bca3c301p12d9f4jsnbb29159b1164"
-        }
-
-        response = requests.request("GET", url, headers=headers)
-
-        print(response.text)
 
 
 def setup(bot: Bot) -> None:
