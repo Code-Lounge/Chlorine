@@ -5,7 +5,6 @@ from discord.ext.commands.errors import *
 from discord.errors import *
 from random import randint
 
-
 class Events(Cog):
     def __init__(self, bot: Bot) -> None:
         self.bot = bot
