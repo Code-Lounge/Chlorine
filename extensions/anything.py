@@ -4,8 +4,6 @@ from discord import Webhook, AsyncWebhookAdapter, Member, Embed
 from aiohttp import ClientSession
 from datetime import datetime
 
-from re import sub
-
 
 class Anything(Cog):
     def __init__(self, bot: Bot):
@@ -22,7 +20,6 @@ class Anything(Cog):
             try:
                 webhook = Webhook.from_url(self.wh_url, adapter=adapter)
                 webhookSend = await webhook.send(message, username=f"Sugestão ~ {ctx.author.name}", avatar_url=ctx.author.avatar_url)
-                print(webhookSend)
             except:
                 # raised by Webhook.from_url ~ InvalidArgument – The URL is invalid.
                 await ctx.send(f"Não foi possível enviar a sua sugestão...")
