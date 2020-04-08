@@ -33,7 +33,7 @@ class Moderation(Cog):
             await ctx.send(f"{target.mention} foi expulso do servidor.")
 
     @command()
-    @has_permissions(manage_roles=True)
+    @has_permissions()
     async def mute(self, ctx: Context, target: Member, reason: str = "...", timeout: int = 1):
         #raise NotImplementedError()
         try:
@@ -46,7 +46,7 @@ class Moderation(Cog):
             await target.remove_roles(self.mute_role)
 
     @command()
-    @has_permissions(manage_roles=True)
+    @has_permissions()
     async def trustworthy(self, ctx: Context, target: Member):
         try:
             await target.add_roles(self.trustworthy_role)
