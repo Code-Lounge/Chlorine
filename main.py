@@ -16,6 +16,7 @@ class NPC(Bot):
         self.log_channel_id = self.database["Channels"]["log"]
         self.main_channel_id = self.database["Channels"]["main"]
         self.suggestion_channel_id = self.database["Channels"]["suggestion"]
+        self.trustworthy_role = self.database["Roles"]["trustworthy"]
         
         super().__init__(*args, **kwargs)
 

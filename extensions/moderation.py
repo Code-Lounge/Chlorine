@@ -37,7 +37,7 @@ class Moderation(Cog):
     async def mute(self, ctx: Context, target: Member, reason: str = "...", timeout: int = 1):
         #raise NotImplementedError()
         try:
-            await target.add_roles(self.mute_role)
+            await target.add_roles(ctx.guild.get_role(self.bot.mute_role))
         except HTTPException:
             await ctx.send(f"Não foi possível adicionar o cargo para {target.mention}.")
         else:
@@ -49,11 +49,11 @@ class Moderation(Cog):
     @has_permissions()
     async def trustworthy(self, ctx: Context, target: Member):
         try:
-            await target.add_roles(self.trustworthy_role)
+            await target.add_roles(ctx.guild.get_role(self.bot.trustworthy_role))
         except HTTPException as error:
             await ctx.send(f"Não foi possível adicionar o cargo para {target.mention}. {error.text}")
         else:
-            await ctx.send(f"{target.mention} agora possuí o cargo `{self.trustworthy_role.name}`!")
+            await ctx.send(f"{target.mention} agora possuí o cargo `<@!{self.bot.trustworthy_role}>`!")
 
 
 def setup(bot: Bot) -> None:

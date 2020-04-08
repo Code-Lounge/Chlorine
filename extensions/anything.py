@@ -1,15 +1,13 @@
 from discord.ext.commands import Cog, command, Bot, Context
-from os.path import basename
+from os import path, getenv
 from discord import Webhook, AsyncWebhookAdapter, Member, Embed
 from aiohttp import ClientSession
 from datetime import datetime
-
+WH_URL = getenv('URL_WEBHOOK')
 
 class Anything(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
-
-        self.wh_url = ""
 
     @command()
     async def suggestion(self, ctx: Context, *, message):
@@ -18,14 +16,14 @@ class Anything(Cog):
             adapter = AsyncWebhookAdapter(session)
 
             try:
-                webhook = Webhook.from_url(self.wh_url, adapter=adapter)
+                webhook = Webhook.from_url(WH_URL, adapter=adapter)
                 webhookSend = await webhook.send(message, username=f"Sugestão ~ {ctx.author.name}", avatar_url=ctx.author.avatar_url)
             except:
                 # raised by Webhook.from_url ~ InvalidArgument – The URL is invalid.
                 await ctx.send(f"Não foi possível enviar a sua sugestão...")
             else:
                 await ctx.send(f"Obrigado pela sua sugestão! Ela foi encaminhada para os moderadores!")
-
+    
     @command()
     async def info(self, ctx: Context, member: Member):
         info_embed = Embed(colour=member.color)
@@ -88,9 +86,9 @@ def setup(bot: Bot) -> None:
     except Exception as error:
         print("{0.__class__.__name__}: {0}".format(error))
     else:
-        print(f"[{basename(__file__).upper()}] has been loaded.")
+        print(f"[{path.basename(__file__).upper()}] has been loaded.")
 
 
 def teardown(bot: Bot) -> None:
     # ~On unload
-    print(f"[{basename(__file__).upper()}] has been unloaded.")
+    print(f"[{path.basename(__file__).upper()}] has been unloaded.")
