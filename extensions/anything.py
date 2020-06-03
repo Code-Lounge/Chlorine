@@ -3,6 +3,7 @@ from os import path, getenv
 from discord import Webhook, AsyncWebhookAdapter, Member, Embed
 from aiohttp import ClientSession
 from datetime import datetime
+
 WH_URL = getenv('URL_WEBHOOK')
 
 

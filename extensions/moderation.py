@@ -1,8 +1,7 @@
-import requests
-
-from discord.ext.commands import Cog, Bot, command, Context, has_permissions
-from discord import Member, Guild
+from discord.ext.commands import Cog, Bot, command, Context, has_permissions, bot_has_permissions
+from discord import Member, Guild, Role
 from discord.errors import HTTPException
+
 from asyncio import sleep
 from os.path import basename
 
@@ -13,47 +12,55 @@ class Moderation(Cog):
 
     @command()
     @has_permissions(ban_members=True)
-    async def ban(self, ctx: Context, target: Member, reason: str = "...") -> None:
+    @bot_has_permissions(ban_members=True)
+    async def ban(self, ctx: Context, target: Member, reason: str="...") -> None:
         try:
             await ctx.guild.ban(target, reason=reason, delete_message_days=0)
-        except HTTPException as error:
-            await ctx.send(f"Não foi possível banir {target.mention}. {error.text}")
+        except HTTPException:
+            #A pessoa pode estar em uma posição hierarquica maior do que a do bot.
+            await ctx.send(f"Não foi possível banir {target.mention}.")
         else:
             await ctx.send(f"{target.mention} foi banido do servidor.")
 
     @command()
     @has_permissions(kick_members=True)
-    async def kick(self, ctx: Context, target: Member, reason: str = "...") -> None:
-        #raise NotImplementedError()
+    @bot_has_permissions(kick_members=True)
+    async def kick(self, ctx: Context, target: Member, reason: str="...") -> None:
         try:
             await ctx.guild.kick(target, reason=reason, delete_message_days=0)
-        except HTTPException as error:
-            await ctx.send(f"Não foi possível expulsar {target.mention}. {error.text}")
+        except HTTPException:
+            #A pessoa pode estar em uma posição hierarquica maior do que a do bot.
+            await ctx.send(f"Não foi possível expulsar {target.mention}.")
         else:
             await ctx.send(f"{target.mention} foi expulso do servidor.")
 
     @command()
-    @has_permissions()
-    async def mute(self, ctx: Context, target: Member, reason: str = "...", timeout: int = 1):
-        #raise NotImplementedError()
-        try:
-            await target.add_roles(ctx.guild.get_role(self.bot.mute_role))
-        except HTTPException:
-            await ctx.send(f"Não foi possível adicionar o cargo para {target.mention}.")
+    @has_permissions(manage_roles=True)
+    @bot_has_permissions(manage_roles=True)
+    async def mute(self, ctx: Context, target: Member, reason: str="...", timeout: int=1):
+        mute_role = ctx.guild.get_role(self.bot.mute_role)
+        if mute_role:
+            try:
+                await target.add_roles(mute_role, reason=reason)
+            except HTTPException:
+                await ctx.send(f"Não foi possível adicionar o cargo de mute para {target.mention}.")
+            else:
+                await ctx.send(f"{target.mention} foi mutado por {timeout} hora{'s' if timeout != 1 else ''}!")
+                await sleep(60 * 60 * timeout)
+                await target.remove_roles(self.mute_role)
         else:
-            await ctx.send(f"{target.mention} foi mutado por {timeout} hora{'s' if timeout != 1 else ''}!")
-            await sleep(60 * 60 * timeout)
-            await target.remove_roles(self.mute_role)
+            await ctx.send("O cargo de mute não está definido ou não foi encontrado.")
 
     @command()
-    @has_permissions()
-    async def trustworthy(self, ctx: Context, target: Member):
+    @has_permissions(manage_roles=True)
+    @bot_has_permissions(manage_roles=True)
+    async def role(self, ctx: Context, target: Member, role: Role):
         try:
-            await target.add_roles(ctx.guild.get_role(self.bot.trustworthy_role))
-        except HTTPException as error:
-            await ctx.send(f"Não foi possível adicionar o cargo para {target.mention}. {error.text}")
+            await target.add_roles(role)
+        except HTTPException:
+            await ctx.send(f"Não foi possível adicionar o cargo {role.name} para {target.mention}.")
         else:
-            await ctx.send(f"{target.mention} agora possuí o cargo `<@!{self.bot.trustworthy_role}>`!")
+            await ctx.send(f"O cargo {role.name} foi adicionado à {target.mention}.")
 
 
 def setup(bot: Bot) -> None:

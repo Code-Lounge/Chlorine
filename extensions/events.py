@@ -44,6 +44,10 @@ class Events(Cog):
         elif isinstance(error, MissingRequiredArgument):
             await ctx.send(f"Você não me informou o `{error.param.name}` do comando `{ctx.invoked_with}`.")
 
+        elif isinstance(error, BotMissingPermissions):
+            missing_permissions = ', '.join(error.missing_perms)
+            await ctx.send(f"Eu não possuio permissões o suficientes para executar este comando.\nPermissões faltantes: `{missing_permissions}`")
+
         elif isinstance(error, BadArgument):
             await ctx.send(f"Você me passou uma informação errada para o comando `{ctx.invoked_with}`!")
 
