@@ -1,5 +1,5 @@
 from discord.ext.commands import Bot
-#from dotenv import load_dotenv
+from dotenv import load_dotenv
 
 from os import walk, name, getenv
 from os.path import join, splitext, abspath, split
