@@ -1,5 +1,5 @@
 from discord.ext.commands import Bot, Cog, Context
-from discord import Message, Member, Game, Reaction, RawReactionActionEvent
+from discord import Message, Member, Game, Reaction, RawReactionActionEvent, Embed
 from discord.ext.commands.errors import *
 from discord.errors import *
 from discord.utils import get, find
@@ -101,12 +101,12 @@ class Events(Cog):
 
     @Cog.listener()
     async def on_reaction_add(self, reaction: Reaction, user: Member):
-        starboard = get(reaction.guild.text_channels, name="starboard")
+        message = reaction.message
+
+        starboard = get(message.guild.text_channels, name="starboard")
 
         if not starboard:
             return
-
-        message = reaction.message
 
         if message.channel == starboard:
             return
@@ -114,35 +114,42 @@ class Events(Cog):
         if str(reaction.emoji) == '⭐':
             reactions = message.reactions
 
-            if '🌟' not in reactions:
-                if '⭐' in reactions:
-                    stars = find(lambda r: str(r.emoji) == '⭐', reactions)
-                else:
+            def make_check(emoji: str):
+                def check(r):
+                    return str(r.emoji) == emoji
+                return check
+
+            star_two_in_reactions = find(make_check('🌟'), reactions)
+            if star_two_in_reactions:
+                if star_two_in_reactions.me:
                     return
 
-                if stars.count < 1:
-                    return
+            star_in_reactions = find(make_check('⭐'), reactions)
+            if star_in_reactions:
+                stars = find(lambda r: str(r.emoji) == '⭐', reactions)
+            else:
+                return
 
-                await reaction.message.add_reaction('🌟')
-                
-                embed = Embed(
-                    title="Uma nova pérola apareceu!",
-                    color=0xfcff59,
-                    description=message.content or None,
-                    url=message.jump_url
-                )
-                
-                image = None
-                attachments = message.attachments
-                if attachments:
-                    for attachment in attachments:
-                        if attachment.height and attachment.width:
-                            image = attachment.proxy_url or attachment.url
-                            break
+            if stars.count <= 1:
+                return
 
-                embed.set_image(url=image)
+            await reaction.message.add_reaction('🌟')
+            
+            embed = Embed(
+                title="Uma nova pérola apareceu!",
+                color=0xfcff59,
+                description=message.content or None,
+                url=message.jump_url
+            )
+            
+            attachments = message.attachments
+            if attachments:
+                for attachment in attachments:
+                    if attachment.height and attachment.width:
+                        embed.set_image(url=(attachment.proxy_url or attachment.url))
+                        break
 
-                await starboard.send(embed=embed)
+            await starboard.send(embed=embed)
 
     @Cog.listener()
     async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
