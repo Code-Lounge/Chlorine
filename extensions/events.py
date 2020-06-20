@@ -1,9 +1,12 @@
 from discord.ext.commands import Bot, Cog, Context
-from discord import Message, Member, Game
-from os.path import basename
+from discord import Message, Member, Game, Reaction, RawReactionActionEvent
 from discord.ext.commands.errors import *
 from discord.errors import *
+from discord.utils import get, find
+
+from os.path import basename
 from random import randint
+
 
 class Events(Cog):
     def __init__(self, bot: Bot) -> None:
@@ -95,6 +98,55 @@ class Events(Cog):
         if before.roles != after.roles:
             #Roles has been changed
             pass
+
+    @Cog.listener()
+    async def on_reaction_add(self, reaction: Reaction, user: Member):
+        starboard = get(reaction.guild.text_channels, name="starboard")
+
+        if not starboard:
+            return
+
+        message = reaction.message
+
+        if message.channel == starboard:
+            return
+        
+        if str(reaction.emoji) == '⭐':
+            reactions = message.reactions
+
+            if '🌟' not in reactions:
+                if '⭐' in reactions:
+                    stars = find(lambda r: str(r.emoji) == '⭐', reactions)
+                else:
+                    return
+
+                if stars.count < 1:
+                    return
+
+                await reaction.message.add_reaction('🌟')
+                
+                embed = Embed(
+                    title="Uma nova pérola apareceu!",
+                    color=0xfcff59,
+                    description=message.content or None,
+                    url=message.jump_url
+                )
+                
+                image = None
+                attachments = message.attachments
+                if attachments:
+                    for attachment in attachments:
+                        if attachment.height and attachment.width:
+                            image = attachment.proxy_url or attachment.url
+                            break
+
+                embed.set_image(url=image)
+
+                await starboard.send(embed=embed)
+
+    @Cog.listener()
+    async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
+        pass
 
 
 def setup(bot: Bot) -> None:
