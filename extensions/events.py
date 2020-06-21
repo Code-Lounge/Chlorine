@@ -130,7 +130,7 @@ class Events(Cog):
             else:
                 return
 
-            if stars.count <= 1:
+            if stars.count <= 2:
                 return
 
             await reaction.message.add_reaction('🌟')
