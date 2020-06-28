@@ -12,18 +12,6 @@ WH_URL = getenv('URL_WEBHOOK')
 class Anything(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
-
-    @command()
-    async def t(self, ctx):
-        starboard = get(ctx.guild.text_channels, name="starboard")
-        await starboard.send(embed=Embed(
-            title="Uma nova pérola apareceu!",
-            color=0xfcff59,
-            description="Um [brilho](https://discordapp.com/channels/658966328501338125/658966617354665984/726595328584974377) está vindo do canal <#658966617354665984>!\n\ncomo saiu do erro nium-kun"
-        ).set_footer(
-            icon_url="https://cdn.discordapp.com/avatars/417129387301928960/583149aebd7799abe3081379d11ebd1f.png?size=128",
-            text="DiogoXp#1770"
-        ))
         
     @command()
     async def suggestion(self, ctx: Context, *, message):
