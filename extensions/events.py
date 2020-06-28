@@ -135,11 +135,14 @@ class Events(Cog):
 
             await reaction.message.add_reaction('🌟')
             
-            embed = Embed(
+            Embed(
                 title="Uma nova pérola apareceu!",
+                description=f"Um [brilho]({message.jump_url}) está vindo do canal {message.channel.mention}!\n\n" + (message.content or ''),
                 color=0xfcff59,
-                description=message.content or None,
                 url=message.jump_url
+            ).set_footer(
+                icon_url=message.author.avatar_url,
+                text=message.author.name + '#' + message.author.discriminator
             )
             
             attachments = message.attachments
