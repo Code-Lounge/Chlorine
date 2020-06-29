@@ -6,6 +6,8 @@ from discord.utils import get, find
 
 from os.path import basename
 from random import randint
+from difflib import get_close_matches
+from asyncio import TimeoutError
 
 
 class Events(Cog):
@@ -13,43 +15,64 @@ class Events(Cog):
         self.bot = bot
 
     @Cog.listener()
-    async def on_ready(self) -> None:
+    async def on_ready(self):
         await self.bot.change_presence(activity=Game(name="você pela janela, não se segure!"))
+
+        l = []
+        for command in self.bot.commands:
+            l.extend([command.name] + command.aliases)
+        self.bot.commands_calls = l
+
         print("Hello world, i'm here!")
 
     @Cog.listener()
-    async def on_message(self, message: Message) -> None:
+    async def on_message(self, message: Message):
+        channel = message.channel
         
         if "bom dia" in message.content.lower():
             reply = f"B{'o' * randint(1, 3)}m di{'a' * randint(1, 5)}!"
-            await message.channel.send(reply)
+            await channel.send(reply)
 
-        suggestion_channel = message.guild.get_channel(self.bot.suggestion_channel_id)
-        if suggestion_channel:
-            if message.channel.id == suggestion_channel.id:
-                await message.add_reaction('⬆️')
-                await message.add_reaction('⬇️')
-        else:
-            print(f"Suggestion channel not found.")
+        if channel.name in ["sugestões", "sugestão"]:
+            await message.add_reaction('⬆️')
+            await message.add_reaction('⬇️')
 
-            
         #await self.bot.process_commands(message)
 
     @Cog.listener()
-    async def on_command_error(self, ctx: Context, error: CommandError) -> None:
+    async def on_command_error(self, ctx: Context, error: CommandError):
         if isinstance(error, CommandNotFound):
-            await ctx.message.add_reaction('❌')
+            matches = get_close_matches(ctx.invoked_with, self.bot.commands_calls) 
+            if matches:
+                await ctx.message.add_reaction('❔')
+                
+                def check(reaction, user) -> bool:
+                    return str(reaction.emoji) == '❔' and \
+                           reaction.message.id == ctx.message.id and \
+                           user == ctx.author
+                
+                try:
+                    await self.bot.wait_for("reaction_add", check=check, timeout=30)
+                except TimeoutError:
+                    pass
+                else:
+                    commands = '.'.join(matches)
+                    await ctx.send(f"Os comandos parecidos com `{ctx.invoked_with}` são:```{commands}.```Para saber como utiliza-los, use o comando `{ctx.prefix}help nome_do_commando`!")
+
+            else:
+                await ctx.message.add_reaction('❌')
 
         elif isinstance(error, MissingPermissions):
             missing_permissions = ', '.join(error.missing_perms)
             await ctx.send(f"Você não possuí permissões o suficientes para executar este comando.\nPermissões faltantes: `{missing_permissions}`")
 
         elif isinstance(error, MissingRequiredArgument):
-            await ctx.send(f"Você não me informou o `{error.param.name}` do comando `{ctx.invoked_with}`.")
+            parameters = ' '.join([f"[{param}]" for param in ctx.command.clean_params])
+            await ctx.send(f"```{ctx.invoked_with} {parameters}```")
 
         elif isinstance(error, BotMissingPermissions):
             missing_permissions = ', '.join(error.missing_perms)
-            await ctx.send(f"Eu não possuio permissões o suficientes para executar este comando.\nPermissões faltantes: `{missing_permissions}`")
+            await ctx.send(f"Eu não possuo permissões o suficientes para executar este comando.\nPermissões faltantes: `{missing_permissions}`")
 
         elif isinstance(error, BadArgument):
             await ctx.send(f"Você me passou uma informação errada para o comando `{ctx.invoked_with}`!")
@@ -63,41 +86,24 @@ class Events(Cog):
             raise error
 
     @Cog.listener()
-    async def on_error(self, event, *args, **kwargs) -> None:
-        pass
-
-    @Cog.listener()
     async def on_member_join(self, member: Member):
         message = f"{member.mention} entrou no servidor."
 
-        log_channel = member.guild.get_channel(self.bot.log_channel_id)
+        log_channel = get(member.guild.text_channels, name="log")
+        main_channel = get(member.guild.text_channels, name="principal")
+
         if log_channel:
             await log_channel.send(message)
-        else:
-            print(f"Log channel not found.")
-        
-        main_channel = member.guild.get_channel(self.bot.main_channel_id)
+
         if self.main_channel:
             await main_channel.send(message)
-        else:
-            print(f"Main channel not found.")
 
     @Cog.listener()
     async def on_member_remove(self, member: Member):
-        log_channel = member.guild.get_channel(self.bot.log_channel_id)
+        log_channel = get(member.guild.text_channels, name="log")
+
         if log_channel:
             await log_channel.send(f"{member.mention} deixou o servidor.")
-        else:
-            print(f"Log channel not found.")
-
-    @Cog.listener()
-    async def on_member_update(self, before: Member, after: Member):
-        return
-        raise NotImplementedError()
-        
-        if before.roles != after.roles:
-            #Roles has been changed
-            pass
 
     @Cog.listener()
     async def on_reaction_add(self, reaction: Reaction, user: Member):
@@ -154,12 +160,7 @@ class Events(Cog):
 
             await starboard.send(embed=embed)
 
-    @Cog.listener()
-    async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
-        pass
-
-
-def setup(bot: Bot) -> None:
+def setup(bot: Bot):
     # ~On load
     try:
         bot.add_cog(Events(bot))
@@ -168,6 +169,6 @@ def setup(bot: Bot) -> None:
     else:
         print(f"[{basename(__file__).upper()}] has been loaded.")
 
-def teardown(bot: Bot) -> None:
+def teardown(bot: Bot):
     # ~On unload
     print(f"[{basename(__file__).upper()}] has been unloaded.")
