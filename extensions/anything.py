@@ -22,9 +22,9 @@ class Anything(Cog):
             try:
                 webhook = Webhook.from_url(WH_URL, adapter=adapter)
                 await webhook.send(message, username="Sugestão ~ " + ctx.author.name, avatar_url=ctx.author.avatar_url)
-            except InvalidArgument, HTTPException:
+            except (InvalidArgument, HTTPException):
                 await ctx.send("Não foi possível enviar a sua sugestão...")
-            except NotFound, Forbidden:
+            except (NotFound, Forbidden):
                 await ctx.send("Parece que há algum problema com o sistema de sugestão, tenta de novo mais tarde!")
             else:
                 await ctx.send("Obrigado pela sua sugestão! Ela foi encaminhada para os moderadores!")
