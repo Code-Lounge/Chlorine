@@ -1,9 +1,9 @@
-from discord.ext.commands import Cog, command, Bot, Context
-from discord import Webhook, AsyncWebhookAdapter, Member, Embed
+from discord.ext.commands import Cog, command, Bot, Context, guild_only
+from discord import Webhook, AsyncWebhookAdapter, Member, Embed, HTTPException, NotFound, Forbidden
 from discord.utils import get
+from aiohttp import ClientSession
 
 from os import path, getenv
-from aiohttp import ClientSession
 from datetime import datetime
 
 WH_URL = getenv('URL_WEBHOOK')
@@ -12,23 +12,26 @@ WH_URL = getenv('URL_WEBHOOK')
 class Anything(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
-        
-    @command()
-    async def suggestion(self, ctx: Context, *, message):
+
+    @guild_only()
+    @command(name="suggestion", aliases=["sugestão",])
+    async def suggestion_command(self, ctx: Context, *, message):
         async with ClientSession() as session:
             adapter = AsyncWebhookAdapter(session)
 
             try:
                 webhook = Webhook.from_url(WH_URL, adapter=adapter)
-                webhookSend = await webhook.send(message, username=f"Sugestão ~ {ctx.author.name}", avatar_url=ctx.author.avatar_url)
-            except:
-                #raised by Webhook.from_url ~ InvalidArgument – The URL is invalid.
-                await ctx.send(f"Não foi possível enviar a sua sugestão...")
+                await webhook.send(message, username="Sugestão ~ " + ctx.author.name, avatar_url=ctx.author.avatar_url)
+            except (InvalidArgument, HTTPException):
+                await ctx.send("Não foi possível enviar a sua sugestão...")
+            except (NotFound, Forbidden):
+                await ctx.send("Parece que há algum problema com o sistema de sugestão, tenta de novo mais tarde!")
             else:
-                await ctx.send(f"Obrigado pela sua sugestão! Ela foi encaminhada para os moderadores!")
-    
-    @command()
-    async def info(self, ctx: Context, member: Member):
+                await ctx.send("Obrigado pela sua sugestão! Ela foi encaminhada para os moderadores!")
+
+    @guild_only()
+    @command(name="info")
+    async def info_command(self, ctx: Context, member: Member):
         info_embed = Embed(colour=member.color)
 
         roles = [role.name for role in filter(
@@ -51,8 +54,9 @@ class Anything(Cog):
 
         await ctx.send(embed=info_embed)
 
-    @command()
-    async def server(self, ctx: Context):
+    @guild_only()
+    @command(name="server")
+    async def server_info_command(self, ctx: Context):
         server_embed = Embed(colour=65280)
 
         now = datetime.now()
@@ -75,8 +79,10 @@ class Anything(Cog):
 
         await ctx.send(embed=server_embed)
 
-    @command()
-    async def avatar(self, ctx: Context, member: Member):
+    
+    @guild_only()
+    @command(name="avatar", aliases=["image", "picture"])
+    async def avatar_command(self, ctx: Context, member: Member):
         member_avatar = member.avatar_url if member.avatar_url else member.default_avatar_url
 
         avatar_embed = Embed(colour=65280, description=f'***Avatar de {member.mention}***')
@@ -91,8 +97,7 @@ class Anything(Cog):
     def time_days(date):
         return (datetime.now() - date).days
 
-
-def setup(bot: Bot) -> None:
+def setup(bot: Bot):
     # ~On load
     try:
         bot.add_cog(Anything(bot))
@@ -101,6 +106,6 @@ def setup(bot: Bot) -> None:
     else:
         print(f"[{path.basename(__file__).upper()}] has been loaded.")
 
-def teardown(bot: Bot) -> None:
+def teardown(bot: Bot):
     # ~On unload
     print(f"[{path.basename(__file__).upper()}] has been unloaded.")
