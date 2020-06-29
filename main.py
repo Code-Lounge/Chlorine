@@ -6,12 +6,6 @@ from os import walk, name, getenv
 from os.path import join, splitext, abspath, split
 from json import load
 
-load_dotenv()
-TOKEN = getenv('DISCORD_TOKEN')
-
-root = "extensions"
-files = ["anything", "events", "moderation"]
-
 @contextlib.contextmanager
 def setup_logging() -> None:
     try:
@@ -38,6 +32,13 @@ def setup_logging() -> None:
             logger.removeHandler(handler)
             
 def main():
+    
+    load_dotenv()
+    TOKEN = getenv('DISCORD_TOKEN')
+
+    root = "extensions"
+    files = ["anything", "events", "moderation"]
+
     bot = Bot(command_prefix='.', case_insensitive=True)
 
     for file in files:
