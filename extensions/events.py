@@ -1,5 +1,5 @@
 from discord.ext.commands import Bot, Cog, Context
-from discord import Message, Member, Game, Reaction, RawReactionActionEvent, Embed
+from discord import Message, Member, Game, Reaction, Embed
 from discord.ext.commands.errors import *
 from discord.errors import *
 from discord.utils import get, find
@@ -16,7 +16,8 @@ class Events(Cog):
 
     @Cog.listener()
     async def on_ready(self):
-        await self.bot.change_presence(activity=Game(name="você pela janela, não se segure!"))
+        activity = Game(name="você pela janela, não se segure!")
+        await self.bot.change_presence(activity=activity)
 
         l = []
         for command in self.bot.commands:
@@ -28,7 +29,7 @@ class Events(Cog):
     @Cog.listener()
     async def on_message(self, message: Message):
         channel = message.channel
-        
+
         if "bom dia" in message.content.lower():
             reply = f"B{'o' * randint(1, 3)}m di{'a' * randint(1, 5)}!"
             await channel.send(reply)
@@ -37,20 +38,18 @@ class Events(Cog):
             await message.add_reaction('⬆️')
             await message.add_reaction('⬇️')
 
-        #await self.bot.process_commands(message)
-
     @Cog.listener()
     async def on_command_error(self, ctx: Context, error: CommandError):
         if isinstance(error, CommandNotFound):
             matches = get_close_matches(ctx.invoked_with, self.bot.commands_calls) 
             if matches:
                 await ctx.message.add_reaction('❔')
-                
+
                 def check(reaction, user) -> bool:
                     return str(reaction.emoji) == '❔' and \
                            reaction.message.id == ctx.message.id and \
                            user == ctx.author
-                
+
                 try:
                     await self.bot.wait_for("reaction_add", check=check, timeout=30)
                 except TimeoutError:
@@ -67,7 +66,8 @@ class Events(Cog):
             await ctx.send(f"Você não possuí permissões o suficientes para executar este comando.\nPermissões faltantes: `{missing_permissions}`")
 
         elif isinstance(error, MissingRequiredArgument):
-            parameters = ' '.join([f"[{param}]" for param in ctx.command.clean_params])
+            parameters = [f"[{param}]" for param in ctx.command.clean_params]
+            parameters = ' '.join(parameters)
             await ctx.send(f"```{ctx.invoked_with} {parameters}```")
 
         elif isinstance(error, BotMissingPermissions):
@@ -79,7 +79,10 @@ class Events(Cog):
 
         elif isinstance(error, CommandInvokeError):
             if isinstance(error.original, NotImplementedError):
-                await ctx.send(f"O comando `{ctx.invoked_with}` ainda não foi implementado.")
+                message = "O comando `{}` ainda não foi implementado.".format(
+                    ctx.invoked_with
+                )
+                await ctx.send(message)
             else:
                 raise error
         else:
@@ -116,7 +119,7 @@ class Events(Cog):
 
         if message.channel == starboard:
             return
-        
+
         if str(reaction.emoji) == '⭐':
             reactions = message.reactions
 
@@ -140,7 +143,7 @@ class Events(Cog):
                 return
 
             await reaction.message.add_reaction('🌟')
-            
+
             Embed(
                 title="Uma nova pérola apareceu!",
                 description=f"Um [brilho]({message.jump_url}) está vindo do canal {message.channel.mention}!\n\n" + (message.content or ''),
@@ -150,15 +153,16 @@ class Events(Cog):
                 icon_url=message.author.avatar_url,
                 text=message.author.name + '#' + message.author.discriminator
             )
-            
+
             attachments = message.attachments
             if attachments:
                 for attachment in attachments:
                     if attachment.height and attachment.width:
-                        embed.set_image(url=(attachment.proxy_url or attachment.url))
+                        embed.set_image(url=attachment.url)
                         break
 
             await starboard.send(embed=embed)
+
 
 def setup(bot: Bot):
     # ~On load
@@ -168,6 +172,7 @@ def setup(bot: Bot):
         print("{0.__class__.__name__}: {0}".format(error))
     else:
         print(f"[{basename(__file__).upper()}] has been loaded.")
+
 
 def teardown(bot: Bot):
     # ~On unload
