@@ -74,7 +74,7 @@ class Moderation(Cog):
     @command(name="role")
     @has_permissions(manage_roles=True)
     @bot_has_permissions(manage_roles=True)
-    async def role_command(self, ctx: Context, target: Member, role: Role):
+    async def role_command(self, ctx, target: Member, role: Role):
         """
         Adiciona um cargo qualquer a um membro.
         Você pode passar o nome, id ou menção em ambos, membro ou cargo.
