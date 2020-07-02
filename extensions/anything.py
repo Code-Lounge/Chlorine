@@ -1,4 +1,4 @@
-from discord.ext.commands import Cog, command, Bot, Context, guild_only
+from discord.ext.commands import Cog, command, Bot, guild_only
 from discord import Webhook, AsyncWebhookAdapter, Member, Embed, HTTPException, NotFound, Forbidden
 from discord.utils import get
 from aiohttp import ClientSession
@@ -14,8 +14,11 @@ class Anything(Cog):
         self.bot = bot
 
     @guild_only()
-    @command(name="suggestion", aliases=["sugestão",])
-    async def suggestion_command(self, ctx: Context, *, message):
+    @command(name="suggestion", aliases=["sugestão", ])
+    async def suggestion_command(self, ctx, *, message):
+        """
+        Envia uma sugestão para os moderadores.
+        """
         async with ClientSession() as session:
             adapter = AsyncWebhookAdapter(session)
 
@@ -31,7 +34,10 @@ class Anything(Cog):
 
     @guild_only()
     @command(name="info")
-    async def info_command(self, ctx: Context, member: Member):
+    async def info_command(self, ctx, member: Member):
+        """
+        Mostra informações sobre um determinado membro.
+        """
         info_embed = Embed(colour=member.color)
 
         roles = [role.name for role in filter(
@@ -56,7 +62,10 @@ class Anything(Cog):
 
     @guild_only()
     @command(name="server")
-    async def server_info_command(self, ctx: Context):
+    async def server_info_command(self, ctx):
+        """
+        Mostra as informações do servidor.
+        """
         server_embed = Embed(colour=65280)
 
         now = datetime.now()
@@ -79,18 +88,23 @@ class Anything(Cog):
 
         await ctx.send(embed=server_embed)
 
-    
     @guild_only()
-    @command(name="avatar", aliases=["image", "picture"])
-    async def avatar_command(self, ctx: Context, member: Member):
-        member_avatar = member.avatar_url if member.avatar_url else member.default_avatar_url
+    @command(name="avatar", aliases=["image", "picture", ])
+    async def avatar_command(self, ctx, member: Member):
+        """
+        Mostra a imagem de perfil de determinado membro.
+        """
+        member_avatar = getattr(member, "avatar_url", member.default_avatar_url)
 
-        avatar_embed = Embed(colour=65280, description=f'***Avatar de {member.mention}***')
+        avatar_embed = Embed(
+            colour=65280, description=f'***Avatar de {member.mention}***'
+        ).add_field(
+            name='***Donwload Imagem:***',
+            value=f'***[download]({member_avatar})***'
+        ).set_image(
+            url=member_avatar
+        )
 
-        avatar_embed\
-            .add_field(name='***Donwload Imagem:***', value=f'***[download]({member_avatar})***')\
-            .set_image(url=member_avatar)
-            
         await ctx.send(embed=avatar_embed)
 
     @staticmethod

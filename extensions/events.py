@@ -90,7 +90,7 @@ class Events(Cog):
 
     @Cog.listener()
     async def on_member_join(self, member: Member):
-        message = f"{member.mention} entrou no servidor."
+        message = f"{member.mention} entrou no servidor!"
 
         log_channel = get(member.guild.text_channels, name="log")
         main_channel = get(member.guild.text_channels, name="principal")
@@ -144,7 +144,7 @@ class Events(Cog):
 
             await reaction.message.add_reaction('🌟')
 
-            Embed(
+            embed = Embed(
                 title="Uma nova pérola apareceu!",
                 description=f"Um [brilho]({message.jump_url}) está vindo do canal {message.channel.mention}!\n\n" + (message.content or ''),
                 color=0xfcff59,
