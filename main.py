@@ -2,6 +2,7 @@ from discord.ext.commands import Bot
 from dotenv import load_dotenv
 
 import contextlib
+import logging
 from os import walk, name, getenv
 from os.path import join, splitext, abspath, split
 from json import load
