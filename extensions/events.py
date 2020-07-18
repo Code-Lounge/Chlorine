@@ -32,8 +32,12 @@ class Events(Cog):
 
         if "bom dia" in message.content.lower():
             reply = f"B{'o' * randint(1, 3)}m di{'a' * randint(1, 5)}!"
-            await channel.send(reply)
-
+            
+            try:
+                await channel.send(reply)
+            except Forbidden:
+                pass
+                
         if channel.name in ["sugestões", "sugestão"]:
             await message.add_reaction('⬆️')
             await message.add_reaction('⬇️')
